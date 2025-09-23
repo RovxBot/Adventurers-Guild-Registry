@@ -1,0 +1,69 @@
+name: Register Team on Merge
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'teams/*.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          npm i -g yamljs
+
+      - name: Build payload
+        id: payload
+        run: |
+          # Only process newly ADDED team files, not modified ones
+          NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep '^teams/.*\.yml$' || true)
+          if [ -z "$NEW_FILES" ]; then
+            echo "No new team files added."
+            exit 0
+          fi
+
+          # Ensure only one new team file per commit
+          FILE_COUNT=$(echo "$NEW_FILES" | wc -l)
+          if [ "$FILE_COUNT" -ne 1 ]; then
+            echo "Error: Expected exactly 1 new team file, found $FILE_COUNT"
+            echo "Files: $NEW_FILES"
+            exit 1
+          fi
+
+          F="$NEW_FILES"
+          yaml2json $F > team.json
+          echo "file=$F" >> $GITHUB_OUTPUT
+          echo "json=$(cat team.json | jq -c .)" >> $GITHUB_OUTPUT
+
+      - name: Sign & send to Worker
+        env:
+          REG_URL: ${{ secrets.WORKER_REG_URL }}
+          REG_SECRET: ${{ secrets.WORKER_REG_SECRET }}
+          TEAM_JSON: ${{ steps.payload.outputs.json }}
+        run: |
+          if [ -z "$REG_URL" ] || [ -z "$REG_SECRET" ]; then
+            echo "Missing Worker secrets"; exit 1; fi
+          TS=$(date +%s)
+          BODY="{\"ts\":$TS,\"team\":$TEAM_JSON}"
+          SIG=$(printf "%s" "$BODY" | openssl dgst -sha256 -hmac "$REG_SECRET" -binary | base64 -w0)
+          curl -fsS -X POST "$REG_URL" \
+            -H "content-type: application/json" \
+            -H "x-sig: $SIG" \
+            --data "$BODY"
+
+      - name: Comment receipt
+        if: ${{ success() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.info('Team registered with the Gatekeeper.')

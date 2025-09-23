@@ -1,0 +1,10 @@
+team_name: "Gilded Griffons"
+team_slug: "example-guild"
+captain:
+  name: "Ayla Brass"
+  contact: "signal:@ayla"
+members:
+  - "Jax"
+  - "Mira"
+  - "Thorn"
+pledge: "We shall not test beyond the dungeon walls."

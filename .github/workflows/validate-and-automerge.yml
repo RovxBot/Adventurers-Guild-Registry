@@ -1,0 +1,145 @@
+name: Validate & Auto-merge
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'teams/*.yml'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR (merge ref)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Check for protected file modifications
+        run: |
+          echo "🛡️ Checking for modifications to protected system files..."
+
+          # Get all changed files in this PR
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
+
+          # Define protected file patterns
+          PROTECTED_PATTERNS=(
+            "^\.github/"
+            "^schemas/"
+            "^README\.md$"
+            "^SETUP\.md$"
+            "^teams/example-guild\.yml$"
+          )
+
+          # Check if any changed files match protected patterns
+          VIOLATIONS=""
+          for file in $CHANGED_FILES; do
+            for pattern in "${PROTECTED_PATTERNS[@]}"; do
+              if echo "$file" | grep -E "$pattern" > /dev/null; then
+                VIOLATIONS="$VIOLATIONS\n  - $file"
+                break
+              fi
+            done
+          done
+
+          # Fail if any protected files were modified
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ ERROR: Modifications to protected system files are not allowed!"
+            echo ""
+            echo "The following protected files were modified:"
+            echo -e "$VIOLATIONS"
+            echo ""
+            echo "📋 Players should only add NEW team files in the teams/ directory."
+            echo "📋 Protected files include:"
+            echo "   - All files in .github/ (workflows, templates)"
+            echo "   - All files in schemas/ (validation rules)"
+            echo "   - README.md (instructions)"
+            echo "   - SETUP.md (admin documentation)"
+            echo "   - teams/example-guild.yml (example template)"
+            echo ""
+            echo "💡 To register your team, create a NEW file: teams/<your-team-slug>.yml"
+            exit 1
+          fi
+
+          echo "✅ No protected files modified. Proceeding with validation..."
+
+      - name: Install tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq
+          npm i -g ajv-cli yamljs
+
+      - name: Determine changed team files
+        id: files
+        run: |
+          # Only consider NEW files inside teams/ (not modifications)
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD | grep '^teams/.*\.yml$' || true >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Fail if multiple or no files, or if trying to modify existing
+        run: |
+          mapfile -t FILES <<< "${{ steps.files.outputs.files }}"
+          count=${#FILES[@]}
+          if [ "$count" -ne 1 ]; then
+            echo "Exactly one NEW teams/*.yml file must be added; got $count"
+            exit 1
+          fi
+
+          # Check if any existing team files were modified (not allowed)
+          MODIFIED_FILES=$(git diff --name-only --diff-filter=M origin/${{ github.base_ref }}...HEAD | grep '^teams/.*\.yml$' || true)
+          if [ -n "$MODIFIED_FILES" ]; then
+            echo "Error: Modifications to existing team files are not allowed."
+            echo "Modified files: $MODIFIED_FILES"
+            echo "Please create a new team file instead of modifying existing ones."
+            exit 1
+          fi
+
+          echo "TEAM_FILE=${FILES[0]}" >> $GITHUB_ENV
+
+      - name: Validate schema
+        run: |
+          yaml2json $TEAM_FILE > team.json
+          echo '${{ toJson(secrets) }}' >/dev/null # keep secrets context from being optimized away (no-op)
+          ajv validate -s schemas/team.schema.json -d team.json --strict=false
+
+      - name: Check filename matches team_slug and slug uniqueness
+        run: |
+          SLUG_FROM_FILE="$(basename "$TEAM_FILE" .yml)"
+          SLUG_IN_DOC="$(jq -r '.team_slug' team.json)"
+          if [ "$SLUG_FROM_FILE" != "$SLUG_IN_DOC" ]; then
+            echo "team_slug must match file name: $SLUG_FROM_FILE vs $SLUG_IN_DOC"
+            exit 1
+          fi
+          # Ensure uniqueness against existing files (base branch)
+          git checkout origin/${{ github.base_ref }}
+          if [ -f "teams/$SLUG_IN_DOC.yml" ]; then
+            echo "A team with this slug already exists."
+            exit 1
+          fi
+          echo "All checks passed."
+
+      - name: Enable auto-merge
+        if: ${{ success() }}
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: merge
+
+      - name: Comment success
+        if: ${{ success() }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              owner: context.payload.repository.owner.login,
+              repo: context.payload.repository.name,
+              issue_number: context.payload.pull_request.number,
+              body: "🪄 Checks passed. The Guild Scribe will merge this PR when ready."
+            })

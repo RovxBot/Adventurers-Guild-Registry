@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["team_name", "team_slug", "captain", "members", "pledge"],
+  "properties": {
+    "team_name": { 
+      "type": "string", 
+      "minLength": 3, 
+      "maxLength": 60,
+      "description": "The name of your adventuring team"
+    },
+    "team_slug": { 
+      "type": "string", 
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "description": "URL-friendly team identifier (kebab-case, must match filename)"
+    },
+    "captain": {
+      "type": "object",
+      "required": ["name", "contact"],
+      "properties": {
+        "name": { 
+          "type": "string", 
+          "minLength": 2,
+          "description": "Captain's name"
+        },
+        "contact": { 
+          "type": "string", 
+          "minLength": 2, 
+          "maxLength": 80,
+          "description": "Contact handle (e.g., signal:@username)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "members": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": { 
+        "type": "string", 
+        "minLength": 1 
+      },
+      "description": "List of team member names"
+    },
+    "pledge": { 
+      "type": "string", 
+      "minLength": 10, 
+      "maxLength": 200,
+      "description": "Your team's pledge or motto"
+    }
+  },
+  "additionalProperties": false
+}
