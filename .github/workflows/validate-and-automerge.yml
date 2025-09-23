@@ -78,16 +78,23 @@ jobs:
         id: files
         run: |
           # Only consider NEW files inside teams/ (not modifications)
-          echo "files<<EOF" >> $GITHUB_OUTPUT
-          git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD | grep '^teams/.*\.yml$' || true >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          NEW_FILES=$(git diff --name-only --diff-filter=A origin/${{ github.base_ref }}...HEAD | grep '^teams/.*\.yml$' || true)
+          echo "new_files=$NEW_FILES" >> $GITHUB_OUTPUT
 
       - name: Fail if multiple or no files, or if trying to modify existing
         run: |
-          mapfile -t FILES <<< "${{ steps.files.outputs.files }}"
-          count=${#FILES[@]}
-          if [ "$count" -ne 1 ]; then
-            echo "Exactly one NEW teams/*.yml file must be added; got $count"
+          NEW_FILES="${{ steps.files.outputs.new_files }}"
+
+          # Count files
+          if [ -z "$NEW_FILES" ]; then
+            FILE_COUNT=0
+          else
+            FILE_COUNT=$(echo "$NEW_FILES" | wc -l)
+          fi
+
+          if [ "$FILE_COUNT" -ne 1 ]; then
+            echo "Exactly one NEW teams/*.yml file must be added; got $FILE_COUNT"
+            echo "Files found: $NEW_FILES"
             exit 1
           fi
 
@@ -100,7 +107,7 @@ jobs:
             exit 1
           fi
 
-          echo "TEAM_FILE=${FILES[0]}" >> $GITHUB_ENV
+          echo "TEAM_FILE=$NEW_FILES" >> $GITHUB_ENV
 
       - name: Validate schema
         run: |
