@@ -43,4 +43,33 @@ pledge: "We shall not test beyond the dungeon walls."
 
 ---
 
+## 🗝️ The Trial of the Guild Mark
+
+*"Once the Guild Scribe has inscribed your name in the ancient ledger, your true test begins..."*
+
+The Guild Mark is not simply given—it must be **claimed** by those clever enough to decipher the Scribe's riddle. Only adventurers who demonstrate both technical prowess and wit shall proceed to the next trial.
+
+### The Scribe's Riddle
+
+*Listen well, for the Scribe speaks in whispers:*
+
+> *"The guild-registry-worker dwells in the realm of where media was once hosted,
+> Seek the path of 'guild-mark' with your team's true name within.
+> The ancient protocol of 'team=' shall be your key,
+> To unlock the mark that sets your spirit free."*
+
+*The wise know that some paths require no sorcery—merely the right incantation spoken to the correct oracle.*
+
+### For the Truly Lost
+
+*Should you find yourself wandering in darkness, remember:*
+- The **Scribe's domain** is known to those who read carefully
+- Your **team's true name** is the slug you chose with care
+- The **ancient protocol** has been used since the dawn of the web
+- **No authentication** guards this knowledge—it is freely given to those who seek
+
+*May your queries be swift and your responses be JSON.*
+
+---
+
 *The Guild Scribe validates all submissions automatically. Your team file will be checked against the schema in `schemas/team.schema.json`.*
