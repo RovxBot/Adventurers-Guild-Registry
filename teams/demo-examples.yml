@@ -1,0 +1,8 @@
+team_name: "Demo Examples"
+team_slug: "demo-examples"
+captain:
+  name: "Rov"
+  contact: "signal:@rov"
+members:
+  - "rov"
+pledge: "We shall not test beyond the dungeon walls."
