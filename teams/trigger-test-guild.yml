@@ -1,9 +1,0 @@
-team_name: "Trigger Test Guild"
-team_slug: "trigger-test-guild"
-captain:
-  name: "Test Captain"
-  contact: "signal:@testcaptain"
-members:
-  - "TestMember1"
-  - "TestMember2"
-pledge: "We pledge to test the register workflow trigger!"

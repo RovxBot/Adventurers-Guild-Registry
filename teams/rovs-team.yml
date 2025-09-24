@@ -1,8 +1,0 @@
-team_name: "rovs team"
-team_slug: "rovs-team"
-captain:
-  name: "rov bot"
-  contact: "signal:@rov"
-members:
-  - "rov"
-pledge: "We shall not test beyond the dungeon walls."
