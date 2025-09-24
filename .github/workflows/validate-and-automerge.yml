@@ -204,3 +204,30 @@ jobs:
               issue_number: context.payload.pull_request.number,
               body: "🪄 Checks passed. The Guild Scribe will merge this PR when ready."
             })
+
+  trigger-register:
+    runs-on: ubuntu-latest
+    needs: validate
+    if: ${{ success() }}
+    steps:
+      - name: Wait for auto-merge to complete
+        run: |
+          echo "⏳ Waiting 45 seconds for auto-merge to complete..."
+          sleep 45
+
+      - name: Trigger register workflow
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.actions.createWorkflowDispatch({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'register-on-merge.yml',
+                ref: 'main'
+              });
+              console.log('✅ Register workflow triggered successfully');
+            } catch (error) {
+              console.log('⚠️ Failed to trigger register workflow:', error.message);
+              // Don't fail if this fails - it's a backup trigger
+            }

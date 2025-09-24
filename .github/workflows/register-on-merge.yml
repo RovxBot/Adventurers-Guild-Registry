@@ -1,11 +1,7 @@
 name: Register Team on Merge
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'teams/*.yml'
-  workflow_dispatch:  # Allow manual triggering for testing
+  workflow_dispatch:  # Triggered by validation workflow after successful auto-merge
 
 permissions:
   contents: read
