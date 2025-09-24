@@ -1,0 +1,9 @@
+team_name: "Test Fix Guild"
+team_slug: "test-fix-guild"
+captain:
+  name: "Test Captain"
+  contact: "signal:@testcaptain"
+members:
+  - "Test Captain"
+  - "Test Member"
+pledge: "We test the fixes and make sure they work perfectly."
