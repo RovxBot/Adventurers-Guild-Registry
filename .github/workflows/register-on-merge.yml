@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Fetch at least 2 commits to enable HEAD~1 comparison
 
       - name: Install tools
         run: |
@@ -26,7 +28,14 @@ jobs:
         id: payload
         run: |
           # Only process newly ADDED team files, not modified ones
-          NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep '^teams/.*\.yml$' || true)
+          # Try HEAD~1 first, fallback to checking all team files if no previous commit
+          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+            NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep '^teams/.*\.yml$' || true)
+          else
+            # Fallback: if no HEAD~1, check all team files (likely first commit)
+            NEW_FILES=$(find teams -name "*.yml" -not -name "example-guild.yml" | head -1 || true)
+          fi
+
           if [ -z "$NEW_FILES" ]; then
             echo "No new team files added."
             exit 0
