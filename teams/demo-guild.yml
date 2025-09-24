@@ -1,0 +1,12 @@
+team_name: "demo guild"
+team_slug: "demo-guild"
+captain:
+  name: "Ayla demo Brass"
+  contact: "signal:@ayla"
+members:
+  - "Ayla Brass"
+  - "demo Jax"
+  - "Mira"
+  - "Thorn"
+  - "New Member"
+pledge: "We shall not test beyond the dungeon walls."
