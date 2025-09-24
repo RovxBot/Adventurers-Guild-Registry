@@ -2,6 +2,11 @@ name: Register Team on Merge
 
 on:
   workflow_dispatch:  # Triggered by validation workflow after successful auto-merge
+    inputs:
+      team_file:
+        description: 'Specific team file to register (optional)'
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -24,18 +29,24 @@ jobs:
       - name: Build payload
         id: payload
         run: |
-          # Only process newly ADDED team files, not modified ones
-          # Try HEAD~1 first, fallback to checking all team files if no previous commit
-          if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
-            NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep '^teams/.*\.yml$' || true)
+          # Check if we should process a specific team file (for manual registration)
+          if [ "${{ github.event.inputs.team_file }}" != "" ]; then
+            NEW_FILES="${{ github.event.inputs.team_file }}"
+            echo "Processing specific team file: $NEW_FILES"
           else
-            # Fallback: if no HEAD~1, check all team files (likely first commit)
-            NEW_FILES=$(find teams -name "*.yml" -not -name "example-guild.yml" | head -1 || true)
-          fi
+            # Only process newly ADDED team files, not modified ones
+            # Try HEAD~1 first, fallback to checking all team files if no previous commit
+            if git rev-parse --verify HEAD~1 >/dev/null 2>&1; then
+              NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep '^teams/.*\.yml$' || true)
+            else
+              # Fallback: if no HEAD~1, check all team files (likely first commit)
+              NEW_FILES=$(find teams -name "*.yml" -not -name "example-guild.yml" | head -1 || true)
+            fi
 
-          if [ -z "$NEW_FILES" ]; then
-            echo "No new team files added."
-            exit 0
+            if [ -z "$NEW_FILES" ]; then
+              echo "No new team files added."
+              exit 0
+            fi
           fi
 
           # Ensure only one new team file per commit
