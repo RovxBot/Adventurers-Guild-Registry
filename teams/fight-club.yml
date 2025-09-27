@@ -1,0 +1,7 @@
+team_name: "Fight Club"
+team_slug: "fight-club"
+captain:
+  name: "Rov"
+members:
+  - "Rov"
+pledge: "Don't talk about fight club."
