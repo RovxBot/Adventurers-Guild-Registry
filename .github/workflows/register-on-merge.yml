@@ -71,27 +71,35 @@ jobs:
           if [ -z "$REG_URL" ] || [ -z "$REG_SECRET" ]; then
             echo "Missing Worker secrets"; exit 1; fi
 
-          # Normalise endpoint to /register if not provided
-          if [[ "$REG_URL" != */register ]]; then
-            REG_URL="${REG_URL%/}/register"
+          # Normalise endpoint robustly to end with /register
+          REG_URL="${REG_URL%/}"
+          if [[ "${REG_URL##*/}" != "register" ]]; then
+            REG_URL="$REG_URL/register"
           fi
 
           TS=$(date +%s)
           BODY="{\"ts\":$TS,\"team\":$TEAM_JSON}"
           SIG=$(printf "%s" "$BODY" | openssl dgst -sha256 -hmac "$REG_SECRET" -binary | base64 -w0)
 
-          # Send request and capture response
-          RESP=$(curl -fsS -X POST "$REG_URL" \
+          # Send request, follow redirects, and capture status + body
+          HTTP_CODE=$(curl -sS -o resp_body.txt -w "%{http_code}" -X POST "$REG_URL" \
             -H "content-type: application/json" \
             -H "x-sig: $SIG" \
-            --data "$BODY")
+            --data "$BODY" \
+            -L --post301 --post302)
 
+          RESP="$(cat resp_body.txt)"
+          echo "Worker HTTP $HTTP_CODE"
           echo "$RESP"
 
-          # Basic sanity check: ensure register handler responded, not the root banner
-          if ! echo "$RESP" | grep -q '^Team registered:'; then
-            echo "Unexpected response from worker: $RESP"
-            exit 1
+          # Accept 200 success with expected body; treat 409 as idempotent success
+          if [ "$HTTP_CODE" -eq 200 ]; then
+            if ! echo "$RESP" | grep -q '^Team registered:'; then
+              echo "Unexpected response from worker (HTTP 200): $RESP"; exit 1; fi
+          elif [ "$HTTP_CODE" -eq 409 ]; then
+            echo "Team already registered (HTTP 409). Treating as success.";
+          else
+            echo "Worker returned HTTP $HTTP_CODE: $RESP"; exit 1;
           fi
 
       - name: Comment receipt
