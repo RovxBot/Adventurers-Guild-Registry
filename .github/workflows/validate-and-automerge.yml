@@ -23,7 +23,7 @@ jobs:
 
       - name: Check for protected file modifications
         run: |
-          echo "🛡️ Checking for modifications to protected system files..."
+          echo "Checking for modifications to protected system files..."
 
           # Get all changed files in this PR
           CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
@@ -50,24 +50,24 @@ jobs:
 
           # Fail if any protected files were modified
           if [ -n "$VIOLATIONS" ]; then
-            echo "❌ ERROR: Modifications to protected system files are not allowed!"
+            echo "ERROR: Modifications to protected system files are not allowed!"
             echo ""
             echo "The following protected files were modified:"
             echo -e "$VIOLATIONS"
             echo ""
-            echo "📋 Players should only add NEW team files in the teams/ directory."
-            echo "📋 Protected files include:"
+            echo "Players should only add NEW team files in the teams/ directory."
+            echo "Protected files include:"
             echo "   - All files in .github/ (workflows, templates)"
             echo "   - All files in schemas/ (validation rules)"
             echo "   - README.md (instructions)"
             echo "   - SETUP.md (admin documentation)"
             echo "   - teams/example-guild.yml (example template)"
             echo ""
-            echo "💡 To register your team, create a NEW file: teams/<your-team-slug>.yml"
+            echo "To register your team, create a NEW file: teams/<your-team-slug>.yml"
             exit 1
           fi
 
-          echo "✅ No protected files modified. Proceeding with validation..."
+          echo "No protected files modified. Proceeding with validation..."
 
       - name: Install tooling
         run: |
@@ -122,7 +122,6 @@ jobs:
           TEAM_NAME=$(jq -r '.team_name // empty' team.json)
           TEAM_SLUG=$(jq -r '.team_slug // empty' team.json)
           CAPTAIN_NAME=$(jq -r '.captain.name // empty' team.json)
-          CAPTAIN_CONTACT=$(jq -r '.captain.contact // empty' team.json)
           MEMBERS=$(jq -r '.members // empty' team.json)
           PLEDGE=$(jq -r '.pledge // empty' team.json)
 
@@ -130,7 +129,6 @@ jobs:
           if [ -z "$TEAM_NAME" ]; then echo "Error: team_name is required"; exit 1; fi
           if [ -z "$TEAM_SLUG" ]; then echo "Error: team_slug is required"; exit 1; fi
           if [ -z "$CAPTAIN_NAME" ]; then echo "Error: captain.name is required"; exit 1; fi
-          if [ -z "$CAPTAIN_CONTACT" ]; then echo "Error: captain.contact is required"; exit 1; fi
           if [ -z "$MEMBERS" ] || [ "$MEMBERS" = "null" ]; then echo "Error: members array is required"; exit 1; fi
           if [ -z "$PLEDGE" ]; then echo "Error: pledge is required"; exit 1; fi
 
@@ -168,7 +166,7 @@ jobs:
             # Don't fail for this, just warn
           fi
 
-          echo "✅ Team file validation passed!"
+          echo "Team file validation passed!"
 
       - name: Check filename matches team_slug and slug uniqueness
         run: |
@@ -203,7 +201,7 @@ jobs:
               owner: context.payload.repository.owner.login,
               repo: context.payload.repository.name,
               issue_number: context.payload.pull_request.number,
-              body: "🪄 Checks passed. The Guild Scribe will merge this PR when ready."
+              body: "Checks passed. The Guild Scribe will merge this PR when ready."
             })
 
   trigger-register:
@@ -213,8 +211,8 @@ jobs:
     steps:
       - name: Wait for auto-merge to complete
         run: |
-          echo "⏳ Waiting 45 seconds for auto-merge to complete..."
-          sleep 45
+          echo "Waiting 20 seconds for auto-merge to complete..."
+          sleep 20
 
       - name: Trigger register workflow
         uses: actions/github-script@v7
@@ -227,8 +225,8 @@ jobs:
                 workflow_id: 'register-on-merge.yml',
                 ref: 'main'
               });
-              console.log('✅ Register workflow triggered successfully');
+              console.log('Register workflow triggered successfully');
             } catch (error) {
-              console.log('⚠️ Failed to trigger register workflow:', error.message);
+              console.log('Failed to trigger register workflow:', error.message);
               // Don't fail if this fails - it's a backup trigger
             }
