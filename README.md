@@ -33,6 +33,8 @@ pledge: "We shall not test beyond the dungeon walls."
 
 The Guild Mark is not simply given — it must be **claimed**. After your PR is merged and your party is registered, seek your mark by invoking the Scribe’s oracle:
 
+- Call for the 'guild-registry-worker'
+- At the domain where media once was found. Fun made of a larger streaming service.
 - Speak to the path: `/guild-mark`
 - Whisper your team’s true name as: `?team=<your-team-slug>`
 - The response reveals your Guild Mark. Guard it well.
