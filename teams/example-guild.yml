@@ -1,9 +1,9 @@
 team_name: "Gilded Griffons"
-team_slug: "example-guild"
+team_slug: "gilded-griffons"   # must match filename
 captain:
   name: "Ayla Brass"
-  contact: "signal:@ayla"
 members:
+  - "Ayla"
   - "Jax"
   - "Mira"
   - "Thorn"

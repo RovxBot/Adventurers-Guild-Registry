@@ -1,75 +1,64 @@
 # Adventurers’ Guild Registry
 
-Welcome, traveler! To join the Guild and begin your quest:
+Hear ye, hear ye! Brave traveller, you stand before the desk of the Guild Scribe. To be written into the Ledger and begin your saga, follow this quest.
 
-## How to enroll
+## Act I — The Call to Adventure (Enrolment)
 1. Fork this repository to your own account.
 2. **Create a NEW file** at `teams/<team-slug>.yml` (kebab-case).
-3. Copy the template below into your file and fill it in.
-4. Open a Pull Request back to this repo.
+3. Copy the charter template below into your file and complete it truthfully.
+4. Open a Pull Request back to this repository.
+5. Wait for the Guild Scribe to validate your request and merge your PR.
 
-**IMPORTANT**: Only create NEW files in the `teams/` directory. Do not modify any existing files!
+## Act II — Forge Your Charter (The Team File)
+- Your file name must be `teams/<team-slug>.yml`, where `<team-slug>` is kebab-case.
+- The `team_slug` inside your document must exactly match the file name.
+- The captain’s `contact` is a handle only (for example, `signal:@ayla`); no phone numbers.
 
-When your PR passes the trials, the Guild Scribe will write you into the book of legends and register your party. You’ll then receive your **Guild Mark**
-
-### Template
+### Example Charter Template
 ```yaml
 team_name: "Gilded Griffons"
 team_slug: "gilded-griffons"   # must match filename
 captain:
   name: "Ayla Brass"
-  contact: "signal:@ayla"      # handle only; no phone numbers
 members:
+  - "Ayla"
   - "Jax"
   - "Mira"
   - "Thorn"
 pledge: "We shall not test beyond the dungeon walls."
 ```
-## Rules
-- By submitting you are concenting to logging for the purpouse of scoring (only while on your quest) No logging will be active outside of the trials.
-- Keep it clean
+
+## Act III — Trial I: Claim the Guild Mark
+“Once the Guild Scribe has inscribed your name in the ancient ledger, your first trial begins.”
+
+The Guild Mark is not simply given — it must be **claimed**. After your PR is merged and your party is registered, seek your mark by invoking the Scribe’s oracle:
+
+- Speak to the path: `/guild-mark`
+- Whisper your team’s true name as: `?team=<your-team-slug>`
+- The response reveals your Guild Mark. Guard it well.
+
+Those who read the signs carefully will know where the Scribe’s domain resides. No authentication wards this door; the correct query is key enough.
+
+## Act IV — Guild Laws and Oaths
+- By submitting, you are consenting to logging for the purpose of scoring during your quest. No logging is active outside the trials.
 - Only one guild may be registered per person. No bots.
-- **Edits are allowed before merge, but once your team is registered, the record is permanent.**
+- Edits are allowed before merge, but once your team is registered, the record is permanent.
+- Keep it clean.
 
-## What NOT to modify
-**Your PR will be automatically rejected if you modify any of these protected files:**
-- `.github/` - Workflow files and templates
-- `schemas/` - Validation rules
-- `README.md` - These instructions
-- `teams/example-guild.yml` - Example template
+## Act V — Forbidden Tomes (Do Not Modify)
+Your PR will be automatically rejected if you modify any of these protected scrolls:
+- `.github/` — Workflows and templates
+- `schemas/` — Validation rules
+- `README.md` — These instructions
+- `teams/example-guild.yml` — Example template
 
-**What you CAN do:** Create a NEW file at `teams/<your-team-slug>.yml`
-
-
----
-
-## 🗝️ The Trial of the Guild Mark
-
-*"Once the Guild Scribe has inscribed your name in the ancient ledger, your true test begins..."*
-
-The Guild Mark is not simply given—it must be **claimed** by those clever enough to decipher the Scribe's riddle. Only adventurers who demonstrate both technical prowess and wit shall proceed to the next trial.
-
-### The Scribe's Riddle
-
-*Listen well, for the Scribe speaks in whispers:*
-
-> *"The guild-registry-worker dwells in the realm of where media was once hosted,
-> Seek the path of 'guild-mark' with your team's true name within.
-> The ancient protocol of 'team=' shall be your key,
-> To unlock the mark that sets your spirit free."*
-
-*The wise know that some paths require no sorcery—merely the right incantation spoken to the correct oracle.*
-
-### For the Truly Lost
-
-*Should you find yourself wandering in darkness, remember:*
-- The **Scribe's domain** is known to those who read carefully
-- Your **team's true name** is the slug you chose with care
-- The **ancient protocol** has been used since the dawn of the web
-- **No authentication** guards this knowledge—it is freely given to those who seek
-
-*May your queries be swift and your responses be JSON.*
+What you CAN do: create a NEW file at `teams/<your-team-slug>.yml`.
 
 ---
 
-*The Guild Scribe validates all submissions automatically. Your team file will be checked against the schema in `schemas/team.schema.json`.*
+## Behind the Curtain (How the Magic Works)
+- The Guild Scribe validates every PR automatically against the rules and structure.
+- When the PR is merged, the Guild registers your party and your first trial begins: claim your Guild Mark via the oracle described above.
+- The schema for team files lives at `schemas/team.schema.json` should you wish to study it.
+
+May your commits be steadfast and your responses swift.

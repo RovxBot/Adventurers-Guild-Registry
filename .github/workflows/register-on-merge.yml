@@ -70,13 +70,29 @@ jobs:
         run: |
           if [ -z "$REG_URL" ] || [ -z "$REG_SECRET" ]; then
             echo "Missing Worker secrets"; exit 1; fi
+
+          # Normalise endpoint to /register if not provided
+          if [[ "$REG_URL" != */register ]]; then
+            REG_URL="${REG_URL%/}/register"
+          fi
+
           TS=$(date +%s)
           BODY="{\"ts\":$TS,\"team\":$TEAM_JSON}"
           SIG=$(printf "%s" "$BODY" | openssl dgst -sha256 -hmac "$REG_SECRET" -binary | base64 -w0)
-          curl -fsS -X POST "$REG_URL" \
+
+          # Send request and capture response
+          RESP=$(curl -fsS -X POST "$REG_URL" \
             -H "content-type: application/json" \
             -H "x-sig: $SIG" \
-            --data "$BODY"
+            --data "$BODY")
+
+          echo "$RESP"
+
+          # Basic sanity check: ensure register handler responded, not the root banner
+          if ! echo "$RESP" | grep -q '^Team registered:'; then
+            echo "Unexpected response from worker: $RESP"
+            exit 1
+          fi
 
       - name: Comment receipt
         if: ${{ success() }}

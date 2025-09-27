@@ -16,7 +16,7 @@
     },
     "captain": {
       "type": "object",
-      "required": ["name", "contact"],
+      "required": ["name"],
       "properties": {
         "name": { 
           "type": "string", 
